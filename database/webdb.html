@@ -5,62 +5,186 @@
   
       <script type = "text/javascript">
 
+      class dbtable
+      {
+         constructor(db, select)
+         {
+            this.db     = db;
+            this.select = select;
+			this.buildTable();
+         }
+
+         sqlExecutor (tx, results)
+		 {
+            if (results.rows.left < 1) return;
+            let table = document.createElement("table");
+            let thead = document.createElement("thead");
+            table.appendChild(thead);
+            let tr = document.createElement("tr");
+            for (name in results.rows[0])
+            {
+               let td = document.createElement("td");
+               td.innerText = name;
+               tr.appendChild (td);
+            }
+            thead.appendChild(tr);
+            let tbody = document.createElement("body");
+            table.appendChild(tbody);
+            for (let i  = 0; i < results.rows.length; i++)
+            {
+               let tr = document.createElement("tr");
+               for (name in results.rows[i])
+               {
+                  let td = document.createElement("td");
+                  td.innerText = results.rows[i][name];
+                  tr.appendChild (td);
+               }
+               tbody.appendChild(tr);
+            }
+            //document.body.appendChild(table);
+			this.table = table;
+			document.body.appendChild(this.table)
+         }
+         transactionExecutor(tx)
+         {
+		    tx.executeSql(this.select, [], (tx, results) => this.sqlExecutor(tx, results), null);
+		 }
+
+         buildTable()
+         {
+            this.db.transaction( (tx) => this.transactionExecutor(tx) );
+         }
+      }
+
          document.addEventListener('DOMContentLoaded', () =>
             {
                var db = openDatabase('mydb', '1.0', 'Test DB', 2 * 1024 * 1024);
                var msg;
 			   
+			   x = new dbtable (db, 'SELECT * FROM LOGS');
+			   y = new dbtable (db,
+                            "select x.id d, x.text tx, f.*" +
+                            "   from " +
+                            "      (SELECT id, text FROM foo) x" +
+                            "      inner join foo f" +
+                            "         on x.id == f.id or x.id != f.id");
+			   //document.append(x.table);
+               
                db.transaction( (tx) =>
                   { 
                      tx.executeSql("CREATE TABLE IF NOT EXISTS LOGS (id unique, log)"); 
                      tx.executeSql("INSERT INTO LOGS (id, log) VALUES (1, 'foobar')"); 
                      tx.executeSql("INSERT INTO LOGS (id, log) VALUES (2, 'logmsg')"); 
+
+                     tx.executeSql   ('create table foo (id unique, text)');
+                     tx.executeSql   ('insert into foo (id, text) values (?, ?)', [1,  'unu']);
+                     tx.executeSql   ('insert into foo (id, text) values (?, ?)', [2,  'doi']);
+                     tx.executeSql   ('insert into foo (id, text) values (?, ?)', [3, 'trei']);
                      msg = '<p>Log message created and row inserted.</p>'; 
                      document.querySelector('#status').innerHTML =  msg; 
                   })
-			   
+               
                db.transaction( (tx) =>
                   { 
                      tx.executeSql('SELECT * FROM LOGS', [], (tx, results) =>
                      {
-					    msg = "";
-						if (results.rows.left < 1) return;
-						table = document.createElement("table");
-						thead = document.createElement("thead");
-						table.appendChild(thead);
-						tr = document.createElement("tr");
-						for (name in results.rows[0])
-						{
-						   td = document.createElement("td");
-						   td.innerText = name;
-						   tr.appendChild (td);
-						   msg += name + ";";
-						}
-						thead.appendChild(tr);
-						tbody = document.createElement("body");
-						table.appendChild(tbody);
-                        for (let i  = 0; i < results.rows.length; i++)
-						{
-						   tr = document.createElement("tr");
-						   for (name in results.rows[i])
-						   {
-						      td = document.createElement("td");
-						      td.innerText = results.rows[i][name];
-						      tr.appendChild (td);
-                           }
-						   tbody.appendChild(tr);
-						}
-                        var len = results.rows.length, i;
-                        msg = "<p>Found rows: " + len + "</p>"; 
-                        document.querySelector('#status').innerHTML +=  msg;
-
-                        for (i = 0; i < len; i++) { 
-                           msg = "<p><b>" + results.rows[i].log + "</b></p>"; 
-                           document.querySelector('#status').innerHTML +=  msg; 
+                        if (results.rows.left < 1) return;
+                        table = document.createElement("table");
+                        thead = document.createElement("thead");
+                        table.appendChild(thead);
+                        tr = document.createElement("tr");
+                        for (name in results.rows[0])
+                        {
+                           td = document.createElement("td");
+                           td.innerText = name;
+                           tr.appendChild (td);
                         }
-						document.body.appendChild(table);
+                        thead.appendChild(tr);
+                        tbody = document.createElement("body");
+                        table.appendChild(tbody);
+                        for (let i  = 0; i < results.rows.length; i++)
+                        {
+                           tr = document.createElement("tr");
+                           for (name in results.rows[i])
+                           {
+                              td = document.createElement("td");
+                              td.innerText = results.rows[i][name];
+                              tr.appendChild (td);
+                           }
+                           tbody.appendChild(tr);
+                        }
+                        document.body.appendChild(table);
                      }, null);
                   });
+
+            // db.transaction
+            //    (
+            //       function (tx)
+            //       {
+            //          tx.executeSql
+            //             (
+            //                "select x.id d, x.text tx, f.*" +
+            //                "   from " +
+            //                "      (SELECT id, text FROM foo) x" +
+            //                "      inner join foo f" +
+            //                "         on x.id == f.id or x.id != f.id", [],
+            //                function(tx, results)
+            //                   {
+            //                       document.writeln("{func}<br>");
+            //                       for (var i = 0; i < results.rows.length; i++)
+            //                       {
+            //                           //for (k in results.rows.item(i))document.write(results.rows.item(i)[k] + "; ");
+            //                           document.write("{" + results.rows.item(i)['d'] + "; " + results.rows.item(i).tx + "; " + results.rows.item(i)['id'] + "; " + results.rows.item(i).text + "}");
+            //                           document.write("<br>");
+            //                       }
+            //                   }
+            //             );
+            //          
+            //       }
+            //    );
+          //db.transaction
+          //   (
+          //      function (ctx)
+          //      {
+          //          document.writeln ("{db start}<br>");
+          //          ctx.executeSql   ('create table foo (id unique, text)');
+          //          ctx.executeSql   ('insert into foo (id, text) values (?, ?)', [1,  'unu']);
+          //          ctx.executeSql   ('insert into foo (id, text) values (?, ?)', [2,  'doi']);
+          //          ctx.executeSql   ('insert into foo (id, text) values (?, ?)', [3, 'trei']);
+          //          document.writeln ("{db inter}<br>");
+          //
+          //      }
+          //   );
+          //try
+          //{
+          //   db.transaction
+          //      (
+          //         function (ctx)
+          //         {
+          //            ctx.executeSql
+          //               (
+          //                  "select x.id d, x.text tx, f.*" +
+          //                  "   from " +
+          //                  "      (SELECT id, text FROM foo) x" +
+          //                  "      inner join foo f" +
+          //                  "         on x.id == f.id or x.id != f.id", [],
+          //                  function(trs, results)
+          //                     {
+          //                         document.writeln("{func}<br>");
+          //                         for (var i = 0; i < results.rows.length; i++)
+          //                         {
+          //                             //for (k in results.rows.item(i))document.write(results.rows.item(i)[k] + "; ");
+          //                             document.write("{" + results.rows.item(i)['d'] + "; " + results.rows.item(i).tx + "; " + results.rows.item(i)['id'] + "; " + results.rows.item(i).text + "}");
+          //                             document.write("<br>");
+          //                         }
+          //                     }
+          //               );
+          //            
+          //         }
+          //      );
+          //   db.transaction ( function (ctx) { ctx.executeSql('drop database mydb'); } );
+          //   
+          //}catch(err){alert(err);}
               // db.transaction( (tx) =>
               //    { 
               //       tx.executeSql("SELECT sql FROM sqlite_master WHERE name = 'logs'", [], function (tx, results) { 
