@@ -2,95 +2,14 @@
 
 <html>  
    <head>
-      <style>
-      </style>
-  
-      <script type = "text/javascript">
 
-         class dbtable
-         {
-            constructor(db, select, func)
-            {
-               this.db     = db;
-               this.select = select;
-               this.func = func;
-               this.buildTable();
-            }
+      <link rel="stylesheet" type="text/css" href="./css/webdb.css">
 
-            sqlExecutor (tx, results)
-            {
-               if (results.rows.left < 1) return;
-               let table = document.createElement("table");
-               let thead = document.createElement("thead");
-               table.appendChild(thead);
-               let tr = document.createElement("tr");
-               for (name in results.rows[0])
-               {
-                  let td = document.createElement("td");
-                  td.innerText = name;
-                  tr.appendChild (td);
-               }
-               thead.appendChild(tr);
-               let tbody = document.createElement("body");
-               table.appendChild(tbody);
-               for (let i  = 0; i < results.rows.length; i++)
-               {
-                  let tr = document.createElement("tr");
-                  for (name in results.rows[i])
-                  {
-                     let td = document.createElement("td");
-                     td.innerText = results.rows[i][name];
-                     tr.appendChild (td);
-                  }
-                  tbody.appendChild(tr);
-               }
-               this.table = table;
-               this.func(this.table);
-
-            }
-
-            buildTable(func)
-            {
-                this.db.transaction(
-                             (tx) =>
-                             {
-                                console.log("before execute sql");
-                                tx.executeSql(this.select, [], (tx, results) => this.sqlExecutor(tx, results), null);
-                                console.log("after execute sql");
-                             } );
-            }
-         }
-
-         document.addEventListener('DOMContentLoaded', () =>
-            {
-               var db = openDatabase('mydb', '1.0', 'Test DB', 2 * 1024 * 1024);
-
-               db.transaction( (tx) =>
-                  { 
-                     tx.executeSql("create table if not exists logs (id unique, log)");
-                     tx.executeSql("insert into logs (id, log) values (1, 'foobar')");
-                     tx.executeSql("insert into logs (id, log) values (2, 'logmsg')");
-
-                     tx.executeSql   ('create table foo (id unique, text)');
-                     tx.executeSql   ('insert into foo (id, text) values (?, ?)', [1,  'unu']);
-                     tx.executeSql   ('insert into foo (id, text) values (?, ?)', [2,  'doi']);
-                     tx.executeSql   ('insert into foo (id, text) values (?, ?)', [3, 'trei']);
-
-                  })
-
-               y = new dbtable (db,
-                            "select x.id d, x.text tx, f.*" +
-                            "   from " +
-                            "      (select id, text from foo) x" +
-                            "      inner join foo f" +
-                            "         on x.id == f.id or x.id != f.id",
-                            (table) => document.body.appendChild(table));
-               z = new dbtable (db,
-                            'SELECT * FROM LOGS',
-                            (table) => document.body.appendChild(table));
-
-            })
-
+      <script type="text/javascript" src="./javascript/dbcomponent.js"></script>
+      <script type="text/javascript" src="./javascript/dbinit.js"></script>
+      <script type="text/javascript" src="./javascript/uiinit.js"></script>
+      <script type="text/javascript">
+         document.addEventListener('DOMContentLoaded', () => initDatabase(main));
       </script> 
    </head> 
   
