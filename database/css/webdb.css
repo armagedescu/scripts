@@ -1,2 +1,2 @@
 div.def_table{ border-style: solid;  display: inline-block}
-div.def_table button { height=20px;}
+div.def_table button { padding: 12px 12px; font-size: 12px;}
