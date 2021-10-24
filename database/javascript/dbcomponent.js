@@ -12,8 +12,7 @@ class dbtable
    buildHeader(tx, results)
    {
       let thead = document.createElement("thead");
-      
-      let tr = document.createElement("tr");
+      let tr    = document.createElement("tr");
       for (name in results.rows[0])
       {
          let td = document.createElement("td");
@@ -63,17 +62,49 @@ class dbtable
       this.table = table;
       this.updateTable(tx, results);
       
-      let div = document.createElement("div");
+      let div      = document.createElement("div");
       let btnReset = document.createElement("button");
-      btnReset.test = "reset";
+      btnReset.innerText = "R";
       btnReset.addEventListener("click", () => this.reset());
       div.appendChild(btnReset);
-      
+      let editSql = document.createElement("button");
+      editSql.innerText = "E";
+      editSql.addEventListener("click",  () => this.editSql ());
+      div.appendChild(editSql);
+
       div.appendChild(this.table);
       div.dbcomponent = this;
 
       this.div = div;
       this.func(div);
+   }
+   editSql()
+   {
+      let div      = document.createElement("div");
+	  div.class = "edit_sql";
+
+      let sql = document.createElement("div");
+	  sql.innerText = this.select;
+	  sql.contentEditable = true;
+	  div.appendChild(sql);
+
+	  let btnExec = document.createElement("button");
+      btnExec.innerText = "e";
+      btnExec.addEventListener("click", () =>
+        {
+			this.select = sql.innerText;
+			this.refreshTable();
+			div.remove();
+		});
+      div.appendChild(btnExec);
+	  let btnClose = document.createElement("button");
+      btnClose.innerText = "x";
+      btnClose.addEventListener("click", () => div.remove());
+      div.appendChild(btnClose);
+
+	  document.body.appendChild(div);
+	  //div.classList.toggle("show");
+	  //let text = document.createElement("text");
    }
 
    // Use if HTML table is already shown, but changed the SQL

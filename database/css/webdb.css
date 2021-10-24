@@ -1,2 +1,6 @@
-div.def_table{ border-style: solid;  display: inline-block}
-div.def_table button { padding: 12px 12px; font-size: 12px;}
+div.def_table        { border-style: solid;  display: inline-block; }
+div.def_table button { padding: 12px 12px;   font-size: 12px;       }
+
+/* Popup container */
+.edit_sql { position: relative; display: inline-block; cursor: pointer; }
+
