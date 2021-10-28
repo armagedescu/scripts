@@ -103,8 +103,6 @@ class dbtable
       div.appendChild(btnClose);
 
 	  document.body.appendChild(div);
-	  //div.classList.toggle("show");
-	  //let text = document.createElement("text");
    }
 
    // Use if HTML table is already shown, but changed the SQL
