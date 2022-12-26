@@ -1,12 +1,10 @@
 class dbtable
 {
-   constructor(db, select, func)
+   constructor(db, select)
    {
       this.db         = db;
       this.select     = select;
       this.select_bak = select;
-      this.func       = func;
-      this.buildTable();
    }
 
    buildHeader(tx, results)
@@ -54,7 +52,7 @@ class dbtable
       this.refreshTable();
    }
 
-   sqlExecutor (tx, results)
+   sqlExecutor (tx, results, div)
    {
       if (results.rows.left < 1) return;
       let table = document.createElement("table");
@@ -62,7 +60,7 @@ class dbtable
       this.table = table;
       this.updateTable(tx, results);
       
-      let div      = document.createElement("div");
+      
       let btnReset = document.createElement("button");
       btnReset.innerText = "R";
       btnReset.addEventListener("click", () => this.reset());
@@ -76,7 +74,6 @@ class dbtable
       div.dbcomponent = this;
 
       this.div = div;
-      this.func(div);
    }
    editSql()
    {
@@ -111,23 +108,32 @@ class dbtable
        this.db.transaction(
                     (tx) =>
                     {
-                       console.log("before execute sql");
+                       console.log("refreshTable before execute sql");
                        tx.executeSql(this.select, [], (tx, results) => this.updateTable(tx, results), null);
-                       console.log("after execute sql");
+                       console.log("refreshTable after execute sql");
                     } );
    }
    // Use if it is a newly created HTML table.
    // The func argument is a callback that is called after SQL update.
    // The callback should contain DOM logic that inserts the generated HTML element into HTML document.
    // Function builds a DIV element and a TABLE inside it.
-   buildTable(func)
+   async buildTableIn(div)
    {
-       this.db.transaction(
-                    (tx) =>
-                    {
-                       console.log("before execute sql");
-                       tx.executeSql(this.select, [], (tx, results) => this.sqlExecutor(tx, results), null);
-                       console.log("after execute sql");
-                    } );
+      return new Promise((resolve, reject) =>
+      {
+          this.db.transaction(
+                       (tx) =>
+                       {
+                          console.log("buildTableIn before execute sql");
+                          tx.executeSql(this.select, [], (tx, results) => this.sqlExecutor(tx, results, div), null);
+                          console.log("buildTableIn after execute sql");
+                          resolve(div);
+                       } );
+      });
+   }
+   async buildTable()
+   {
+      let div = document.createElement("div");
+	  return this.buildTableIn(div);
    }
 }
