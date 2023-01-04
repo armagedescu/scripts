@@ -1,4 +1,4 @@
-function main()
+function main(event)
 {
    console.log("start");
 

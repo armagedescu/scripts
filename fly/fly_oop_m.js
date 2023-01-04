@@ -49,22 +49,23 @@ class xfly
       this.xp += d_xp;
 
       //reflect from UP/BOTTOM margins
-      if(this.yp < 0) //left margin
+      if(this.yp < 0) //bottom/up margin
       {
          this.yp += d_yp * ((d_yp < 0) ? -2 : 2);
          this.direction = -this.direction;
       }
-	  else if(this.yp > this.doc_height) //right margin
+	  else if(this.yp > this.doc_height) //upper margin
       {
          this.yp -= d_yp * ((d_yp < 0) ? -2 : 2);
          this.direction = -this.direction;
       }
       //reflect from LEFT/RIGHT margins
-      if(this.xp < 0) //top margin
+      if(this.xp < 0) //left/right margin
       {
          this.xp += d_xp * ((d_xp < 0) ? -2 : 2);
          this.direction += Math.PI / 2 * (this.direction < 0) ? -1 : 1;
-      }else if(this.xp > this.doc_width) //bottom margin
+      }
+	  else if(this.xp > this.doc_width) //bottom margin
       {
          this.xp -= d_xp * ((d_xp < 0) ? -2 : 2);
          this.direction += Math.PI / 2 * (this.direction < 0) ? -1 : 1;
